@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dede.devtools">
+
+    <application>
+
+        <provider
+            android:name="com.dede.devtools.DevToolsInitProvider"
+            android:authorities="${applicationId}.DevToolsInitProvider"
+            android:exported="false" />
+
+    </application>
+</manifest>

@@ -1,0 +1,7 @@
+<resources>
+    <dimen name="dimen_dev_pop_size">42dp</dimen>
+
+    <color name="color_dev_pop_bg">#FF4CAF50</color>
+    <color name="color_dev_pop_bg_press">#FFF2F2F2</color>
+
+</resources>
