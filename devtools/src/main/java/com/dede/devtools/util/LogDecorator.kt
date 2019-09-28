@@ -1,8 +1,10 @@
 package com.dede.devtools.util
 
+import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import com.dede.devtools.ext.isNull
 import java.util.regex.Pattern
 
@@ -148,11 +150,12 @@ object LogDecorator {
             "A" -> 0xFFFF4D4A
             else -> 0xFFFFFFFF
         }
+        log.setSpan(StyleSpan(Typeface.BOLD), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         log.setSpan(
             ForegroundColorSpan(color.toInt()),
             0,
             log.length,
-            Spannable.SPAN_INCLUSIVE_INCLUSIVE
+            Spannable.SPAN_INCLUSIVE_EXCLUSIVE
         )
     }
 }

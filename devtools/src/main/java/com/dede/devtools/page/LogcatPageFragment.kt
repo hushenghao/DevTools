@@ -1,10 +1,6 @@
 package com.dede.devtools.page
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
-import android.os.Process
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,21 +8,25 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.dede.devtools.R
-import com.dede.devtools.util.LogDecorator
 import kotlinx.android.synthetic.main.fragment_logcat.*
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 
 /**
  * Created by hsh on 2019-09-27 11:57
  */
-class LogcatPageFragment : Fragment() {
+class LogcatPageFragment : Fragment(), LogcatDataSource.Listener {
 
-    private val threadPool by lazy {
-        ThreadPoolExecutor(2, 2, 3, TimeUnit.MILLISECONDS, ArrayBlockingQueue(2))
+    private var ignoreUpdate = false
+    private var init = true
+
+    override fun onUpdate() {
+        if (init) {
+            rv_logcat.scrollToPosition(LogcatDataSource.getSize() - 1)
+            init = false
+        }
+        if (ignoreUpdate) {
+            return
+        }
+        rv_logcat.adapter?.notifyDataSetChanged()
     }
 
     override fun onCreateView(
@@ -39,57 +39,16 @@ class LogcatPageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        LogcatDataSource.addListener(this)
         rv_logcat.adapter = LogcatAdapter()
     }
 
-    override fun onDestroy() {
-        threadPool.shutdown()
-        super.onDestroy()
+    override fun onDestroyView() {
+        LogcatDataSource.removeListener(this)
+        super.onDestroyView()
     }
 
     private inner class LogcatAdapter : RecyclerView.Adapter<LogcatHolder>() {
-
-        val logList = ArrayList<CharSequence>()
-        val handler: Handler
-
-        init {
-            val pid = Process.myPid()
-            val shell = "logcat | grep $pid"
-            val process = Runtime.getRuntime().exec(shell)
-            val out = BufferedReader(InputStreamReader(process.inputStream))
-            threadPool.execute {
-                process.waitFor()
-            }
-            threadPool.execute {
-                var s = out.readLine()
-                while (s != null) {
-                    logList.add(LogDecorator.decorate(s))
-                    s = out.readLine()
-                }
-                out.close()
-            }
-
-            handler = @SuppressLint("HandlerLeak")
-            object : Handler() {
-                override fun handleMessage(msg: Message) {
-                    notifyDataSetChanged()
-                    if (msg.what == 1) {
-                        rv_logcat.scrollToPosition(logList.size - 1)
-                    }
-                    sendEmptyMessageDelayed(0, 500)
-                }
-            }
-        }
-
-        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-            super.onAttachedToRecyclerView(recyclerView)
-            handler.sendEmptyMessageDelayed(1, 500)
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-            handler.removeCallbacksAndMessages(null)
-            super.onDetachedFromRecyclerView(recyclerView)
-        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LogcatHolder {
             val view =
@@ -98,12 +57,26 @@ class LogcatPageFragment : Fragment() {
         }
 
         override fun getItemCount(): Int {
-            return logList.size
+            return LogcatDataSource.getSize()
+        }
+
+        var focusView: View? = null
+
+        val focusChangeListener = View.OnFocusChangeListener { view, b ->
+            if (!b) {
+                if (view == focusView) {
+                    ignoreUpdate = false
+                }
+                return@OnFocusChangeListener
+            }
+            focusView = view
+            ignoreUpdate = true
         }
 
         override fun onBindViewHolder(holder: LogcatHolder, position: Int) {
-            val log = logList[position]
+            val log = LogcatDataSource.getData(position)
             holder.tvLog.text = log
+            holder.tvLog.onFocusChangeListener = focusChangeListener
         }
     }
 

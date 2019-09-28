@@ -32,7 +32,7 @@ internal class MainPop(activity: Activity) : Runnable {
     private val context: Context = activity
     private var popupWindow: PopupWindow? = null
 
-    private val defaultMarginX = 15f
+    private val defaultMarginX = 10f
 
     companion object {
         private val point = Point()// 多个pop共享

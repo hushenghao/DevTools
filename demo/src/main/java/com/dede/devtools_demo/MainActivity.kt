@@ -3,6 +3,7 @@ package com.dede.devtools_demo
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import java.util.regex.Pattern
@@ -12,6 +13,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        Thread {
+            while (true) {
+                Log.i("Logcat", "测试日志")
+                SystemClock.sleep(1000)
+            }
+        }.start()
     }
 
     fun openAct(view: View) {
@@ -20,10 +28,10 @@ class MainActivity : AppCompatActivity() {
         val matcher =
             pattern.matcher("09-27 15:21:41.492  1056  1169 I LIGHT   : [LightSensor.cpp: processEvent: 331] light value is 407")
         if (matcher.find()) {
-            for (i in (0..matcher.groupCount()-1)) {
+            for (i in (0..matcher.groupCount())) {
                 Log.i("MainActivity", "openAct: " + matcher.group(i))
             }
         }
-//        startActivity(Intent(this, SecondActivity::class.java))
+        startActivity(Intent(this, SecondActivity::class.java))
     }
 }

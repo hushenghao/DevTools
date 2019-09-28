@@ -3,6 +3,7 @@ package com.dede.devtools
 import android.app.Application
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import com.dede.devtools.lifecycle.ActivityLifecycleCallbacksImpl
