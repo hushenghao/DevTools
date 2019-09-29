@@ -1,4 +1,4 @@
-package com.dede.devtools.page
+package com.dede.devtools.page.tools
 
 import android.os.Bundle
 import androidx.preference.PreferenceFragmentCompat

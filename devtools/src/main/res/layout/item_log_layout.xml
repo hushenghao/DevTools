@@ -3,8 +3,6 @@
     android:id="@+id/tv_log"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
-    android:focusable="true"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:textIsSelectable="true"

@@ -1,4 +1,4 @@
-package com.dede.devtools.page
+package com.dede.devtools.page.logcat
 
 import android.os.Handler
 import android.os.Looper
@@ -16,6 +16,11 @@ object LogcatDataSource : Handler(Looper.getMainLooper()) {
 
     interface Listener {
         fun onUpdate()
+    }
+
+    fun clear() {
+        logList.clear()
+        callbackUpdate()
     }
 
     private val listeners: ArrayList<Listener> = ArrayList()
@@ -71,20 +76,21 @@ object LogcatDataSource : Handler(Looper.getMainLooper()) {
         }
 
         threadPool.execute {
-            var s = out.readLine()
-            while (s != null) {
-                logList.add(LogDecorator.decorate(s))
-
-                sendMessageDelayed(
-                    Message.obtain(this, MSG_UPDATE, logList.size),
-                    100
-                )
+            var run = true
+            var s: CharSequence?
+            while (run) {
+                sendMessageDelayed(Message.obtain(this, MSG_UPDATE), 100)
 
                 try {
                     s = out.readLine()
                 } catch (ignore: IOException) {
                     break
                 }
+                run = s != null
+                if (!run) {
+                    break
+                }
+                logList.add(LogDecorator.decorate(s))
                 // 阻塞时间在100毫秒内，移除消息，忽略刷新
                 removeMessages(MSG_UPDATE)
             }
